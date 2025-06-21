@@ -2,7 +2,7 @@
 
 A scalable social media application built with NestJS microservices architecture, featuring real-time notifications, user management, post creation, and more.
 
-## 🚀 Features
+## �� Features
 
 ### Core Features
 - **User Authentication & Authorization**
@@ -59,6 +59,7 @@ Import this collection into Postman to test all endpoints with pre-configured re
 - **Posts**: `/posts/*` - Post creation, feeds, retrieval
 - **Notifications**: `/notifications/*` - Real-time notifications
 
+<<<<<<< HEAD
 ## 🏗️ Architecture
 
 ### Microservices Overview
@@ -475,3 +476,8 @@ If you encounter any issues or have questions:
 #   i n s t a c l o n e - m i c r o s e r v i c e s 
  
  
+=======
+## ��️ Architecture
+
+### Microservices Overview
+>>>>>>> 64a5871ce445d9a7a60012384a0d812550b4cc67
