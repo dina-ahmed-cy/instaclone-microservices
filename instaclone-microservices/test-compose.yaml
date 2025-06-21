@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  api-gateway-test:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: api-gateway-test
+    environment:
+      PORT: 3000
+      JWT_ACCESS_TOKEN_SECRET: supersecretaccesskey
+      JWT_REFRESH_TOKEN_SECRET: supersecretrefreshkey
+      TEST_VAR: testvalue123
+    ports:
+      - "3000:3000" 

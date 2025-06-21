@@ -1,0 +1,142 @@
+services:
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  user-db:
+    image: postgres:15
+    container_name: user-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: users
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+
+  post-db:
+    image: mongo:6
+    container_name: post-db
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: posts
+    ports:
+      - "27017:27017"
+    volumes:
+      - post_db_data:/data/db
+
+  user-service:
+    build:
+      context: .
+      dockerfile: apps/user-service/Dockerfile
+    container_name: user-service
+    depends_on:
+      - user-db
+    environment:
+      PORT: 3002
+      USER_DB_HOST: user-db
+      USER_DB_PORT: 5432
+      USER_DB_USERNAME: postgres
+      USER_DB_PASSWORD: postgres
+      USER_DB_DATABASE: users
+    ports:
+      - "3002:3002"
+    restart: unless-stopped
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: apps/auth-service/Dockerfile
+    container_name: auth-service
+    depends_on:
+      - redis
+      - user-service
+    environment:
+      PORT: 3001
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      USER_SERVICE_HOST: user-service
+      USER_SERVICE_TCP_PORT: 3002
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+
+  post-service:
+    build:
+      context: .
+      dockerfile: apps/post-service/Dockerfile
+    container_name: post-service
+    depends_on:
+      - post-db
+      - rabbitmq
+    environment:
+      PORT: 3003
+      MONGO_URI: mongodb://post-db:27017/posts
+      RABBITMQ_URI: amqp://rabbitmq:5672
+    ports:
+      - "3003:3003"
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: apps/notification-service/Dockerfile
+    container_name: notification-service
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_URI: amqp://rabbitmq:5672
+      NOTIFICATION_SERVICE_TCP_PORT: 3004
+    ports:
+      - "3004:3004"
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: api-gateway
+    depends_on:
+      - auth-service
+      - user-service
+      - post-service
+      - redis
+      - rabbitmq
+    environment:
+      PORT: 3000
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_URI: amqp://rabbitmq:5672
+      AUTH_SERVICE_HOST: auth-service
+      AUTH_SERVICE_TCP_PORT: 3001
+      USER_SERVICE_HOST: user-service
+      USER_SERVICE_TCP_PORT: 3002
+      POST_SERVICE_HOST: post-service
+      POST_SERVICE_TCP_PORT: 3003
+      JWT_ACCESS_TOKEN_SECRET: supersecretaccesskey
+      JWT_ACCESS_TOKEN_EXPIRATION_TIME: 15m
+      JWT_REFRESH_TOKEN_SECRET: supersecretrefreshkey
+      JWT_REFRESH_TOKEN_EXPIRATION_TIME: 7d
+      TEST_VAR: testvalue123
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+volumes:
+  user_db_data: 
