@@ -36,6 +36,7 @@ A scalable social media application built with NestJS microservices architecture
   - Fault tolerance and resilience
 
 - **Database Integration**
+  - **Separate databases for each service** for optimal performance and data isolation
   - MongoDB for posts and notifications
   - PostgreSQL for user data
   - Redis for caching and session management
@@ -44,6 +45,19 @@ A scalable social media application built with NestJS microservices architecture
   - RabbitMQ for event processing
   - Asynchronous communication
   - Event sourcing and replay
+
+## 📚 API Documentation & Testing
+
+### Postman Collection
+📋 **Complete API Collection**: [Instaclone-API.postman_collection.json](Instaclone-API.postman_collection.json)
+
+Import this collection into Postman to test all endpoints with pre-configured requests, environment variables, and example data.
+
+### API Endpoints Overview
+- **Authentication**: `/auth/*` - Registration, login, token management
+- **Users**: `/users/*` - Profile management, follow/unfollow
+- **Posts**: `/posts/*` - Post creation, feeds, retrieval
+- **Notifications**: `/notifications/*` - Real-time notifications
 
 ## 🏗️ Architecture
 
@@ -135,9 +149,11 @@ A scalable social media application built with NestJS microservices architecture
 - **Authentication**: JWT (JSON Web Tokens)
 
 ### Databases
-- **Primary Database**: PostgreSQL (Users)
-- **Document Database**: MongoDB (Posts, Notifications)
-- **Cache**: Redis
+- **User Service**: PostgreSQL (User profiles, followers, relationships)
+- **Post Service**: MongoDB (Posts, feeds, media data)
+- **Notification Service**: MongoDB (Notifications, event logs)
+- **Auth Service**: Redis (Session cache, JWT storage)
+- **API Gateway**: Redis (Rate limiting, caching)
 
 ### Infrastructure
 - **Containerization**: Docker & Docker Compose
@@ -456,5 +472,6 @@ If you encounter any issues or have questions:
 ---
 
 **Happy Coding! 🚀**
-#   i n s t a c l o n e - m i c r o s e r v i c e s  
+#   i n s t a c l o n e - m i c r o s e r v i c e s 
+ 
  
